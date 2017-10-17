@@ -8,14 +8,18 @@ import (
 	"io"
 	"log"
 	"os"
+	"os/exec"
 	"unicode/utf8"
 )
 
 var (
-	startpg, endpg, lineCountPg int
-	findNewPageSign, readfile   bool
-	destlp, filename            string
-	warning                     *log.Logger
+	startpg, endpg, lineCountPg      int
+	findNewPageSign, readfile, uselp bool
+	destlp, filename                 string
+	warning                          *log.Logger
+	lpcmd                            *exec.Cmd
+	cmdinpipe                        io.WriteCloser
+	cmderr                           error
 )
 
 func init() {
@@ -55,8 +59,13 @@ func parse() {
 	}
 
 	if destlp != "" {
-		fmt.Printf("-d lp : %+v\n", destlp)
-		// lp -d destlp
+		uselp = true
+		lpcmd = exec.Command("lp", "-d", destlp)
+		// lpcmd = exec.Command("cat")  -- for test
+		lpcmd.Stdout = os.Stdout
+		lpcmd.Stderr = os.Stderr
+		cmdinpipe, cmderr = lpcmd.StdinPipe()
+		lpcmd.Start()
 	}
 }
 
@@ -81,6 +90,8 @@ func run() {
 	for {
 		line, err := reader.ReadString('\n')
 		if err == io.EOF {
+			cmdinpipe.Close()
+			lpcmd.Wait()
 			break
 		} else if err != nil {
 			panic(err)
@@ -95,7 +106,11 @@ func run() {
 					pagectr++
 				}
 				if pagectr >= startpg && pagectr <= endpg {
-					fmt.Print(string(r))
+					if uselp {
+						cmdinpipe.Write([]byte(string(r)))
+					} else {
+						fmt.Print(string(r))
+					}
 				}
 				strbyte = strbyte[n:]
 			}
@@ -106,7 +121,11 @@ func run() {
 				linectr = 1
 			}
 			if pagectr >= startpg && pagectr <= endpg {
-				fmt.Print(line)
+				if uselp {
+					cmdinpipe.Write([]byte(line))
+				} else {
+					fmt.Print(line)
+				}
 			}
 		}
 	}
