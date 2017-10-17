@@ -16,6 +16,7 @@ var (
 	destlp, filename            string
 	warning                     *log.Logger
 	inputText                   []string
+	outputText                  string
 )
 
 func init() {
@@ -95,16 +96,33 @@ func run() {
 		}
 	}
 	// select page
+	if findNewPageSign {
 
+	} else {
+		if (startpg-1)*lineCountPg > len(inputText)-1 {
+			log.Fatal("Start page number out of range")
+		}
+		if (endpg-1)*lineCountPg > len(inputText)-1 {
+			log.Fatal("End page number out of range")
+		}
+		startLineIdx := (startpg - 1) * lineCountPg
+		endLineIdx := endpg * lineCountPg
+		if endLineIdx > len(inputText) {
+			endLineIdx = len(inputText)
+		}
+		fmt.Printf("startIdx: %v, endIdx: %v, len(inputText): %v\n", startLineIdx, endLineIdx, len(inputText))
+
+		for i, line := range inputText[startLineIdx:endLineIdx] {
+			fmt.Printf("%v,", i)
+			_, err := fmt.Println(line)
+			if err != nil {
+				panic(err)
+			}
+		}
+	}
 }
 
 func main() {
 	parse()
 	run()
-
-	for _, a := range inputText {
-		if a != "" {
-			fmt.Printf(a)
-		}
-	}
 }
