@@ -9,7 +9,6 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"unicode/utf8"
 )
 
 var (
@@ -84,7 +83,7 @@ func run() {
 	pagectr := 1
 	linectr := 0
 	for {
-		line, err := reader.ReadString('\n')
+		ch, _, err := reader.ReadRune()
 		if err == io.EOF {
 			if uselp {
 				cmdinpipe.Close()
@@ -95,33 +94,23 @@ func run() {
 			panic(err)
 		}
 		if findNewPageSign {
-			strbyte := []byte(line)
-			for len(strbyte) > 0 {
-				r, n := utf8.DecodeRune(strbyte)
-				if r == '\f' {
-					pagectr++
-				}
-				if pagectr >= startpg && pagectr <= endpg {
-					if uselp {
-						cmdinpipe.Write([]byte(string(r)))
-					} else {
-						fmt.Print(string(r))
-					}
-				}
-				strbyte = strbyte[n:]
+			if ch == '\f' {
+				pagectr++
 			}
 		} else {
-			linectr++
-			if linectr > lineCountPg {
-				pagectr++
-				linectr = 1
-			}
-			if pagectr >= startpg && pagectr <= endpg {
-				if uselp {
-					cmdinpipe.Write([]byte(line))
-				} else {
-					fmt.Print(line)
+			if ch == '\n' {
+				linectr++
+				if linectr > lineCountPg {
+					pagectr++
+					linectr = 1
 				}
+			}
+		}
+		if pagectr >= startpg && pagectr <= endpg {
+			if uselp {
+				cmdinpipe.Write([]byte(string(ch)))
+			} else {
+				fmt.Print(string(ch))
 			}
 		}
 	}
