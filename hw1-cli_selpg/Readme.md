@@ -11,6 +11,7 @@
         - [flag处理参数](#flag处理参数)
         - [逐行从 文件/stdin 中读取](#逐行从-文件stdin-中读取)
         - [处理读入的行](#处理读入的行)
+            - [突然想到的优化：逐字符读取](#突然想到的优化逐字符读取)
         - [环境变量的使用](#环境变量的使用)
         - [在程序内部调用 lp -d 打印](#在程序内部调用-lp--d-打印)
 
@@ -131,6 +132,50 @@ for {
     		}
     	}
     }
+}
+```
+
+#### 突然想到的优化：逐字符读取
+原来版本中，我是逐行读取，在指定`-f`的模式下，对每行的字符进行UTF-8的解析，在`strbyte = strbyte[n:]`这里应该会花很多的时间，而且似乎会造成流水线阻塞。然后发现有`bufio.Reader.ReadRune()`这个函数，可以逐字符读取。逐个读取并处理，相比之前每次处理完字符需要额外创建一个切片的操作，要快上很多。
+
+PS: 流水线气泡的细节还是需要查阅《CSAPP》
+
+修改后的代码如下。因为使用了`ReadRune()`，输出的代码只需要一份。所以代码也变短了。
+
+```go
+pagectr := 1
+linectr := 0
+for {
+	ch, _, err := reader.ReadRune()
+	if err == io.EOF {
+		if uselp {
+			cmdinpipe.Close()
+			lpcmd.Wait()
+		}
+		break
+	} else if err != nil {
+		panic(err)
+	}
+	if findNewPageSign {
+		if ch == '\f' {
+			pagectr++
+		}
+	} else {
+		if ch == '\n' {
+			linectr++
+			if linectr > lineCountPg {
+				pagectr++
+				linectr = 1
+			}
+		}
+	}
+	if pagectr >= startpg && pagectr <= endpg {
+		if uselp {
+			cmdinpipe.Write([]byte(string(ch)))
+		} else {
+			fmt.Print(string(ch))
+		}
+	}
 }
 ```
 
