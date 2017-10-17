@@ -61,7 +61,6 @@ func parse() {
 	if destlp != "" {
 		uselp = true
 		lpcmd = exec.Command("lp", "-d", destlp)
-		// lpcmd = exec.Command("cat")  -- for test
 		lpcmd.Stdout = os.Stdout
 		lpcmd.Stderr = os.Stderr
 		cmdinpipe, cmderr = lpcmd.StdinPipe()
@@ -70,7 +69,6 @@ func parse() {
 }
 
 func run() {
-	// var scanner *bufio.Scanner
 	var reader *bufio.Reader
 	if readfile {
 		inputFile, inputErr := os.Open(filename)
@@ -78,10 +76,8 @@ func run() {
 			log.Fatal("An error occurred on opening the inputFile\nCheck if the file exists and access.\n")
 		}
 		defer inputFile.Close()
-		// scanner = bufio.NewScanner(inputFile)
 		reader = bufio.NewReader(inputFile)
 	} else {
-		// scanner = bufio.NewScanner(os.Stdin)
 		reader = bufio.NewReader(os.Stdin)
 	}
 
@@ -90,15 +86,15 @@ func run() {
 	for {
 		line, err := reader.ReadString('\n')
 		if err == io.EOF {
-			cmdinpipe.Close()
-			lpcmd.Wait()
+			if uselp {
+				cmdinpipe.Close()
+				lpcmd.Wait()
+			}
 			break
 		} else if err != nil {
 			panic(err)
 		}
-		// line = strings.Replace(line, "\n", "", -1)
 		if findNewPageSign {
-			// string iteration
 			strbyte := []byte(line)
 			for len(strbyte) > 0 {
 				r, n := utf8.DecodeRune(strbyte)
@@ -128,6 +124,11 @@ func run() {
 				}
 			}
 		}
+	}
+	if pagectr < startpg {
+		warning.Printf("start_page (%v) greater than total pages (%v), no output written.\n", startpg, pagectr)
+	} else if pagectr < endpg {
+		warning.Printf("end_page (%v) greater than total pages (%d), less output than expected.\n", endpg, pagectr)
 	}
 }
 
