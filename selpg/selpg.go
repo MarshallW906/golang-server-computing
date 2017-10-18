@@ -9,7 +9,6 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"unicode/utf8"
 )
 
 var (
@@ -61,7 +60,6 @@ func parse() {
 	if destlp != "" {
 		uselp = true
 		lpcmd = exec.Command("lp", "-d", destlp)
-		// lpcmd = exec.Command("cat")  -- for test
 		lpcmd.Stdout = os.Stdout
 		lpcmd.Stderr = os.Stderr
 		cmdinpipe, cmderr = lpcmd.StdinPipe()
@@ -70,7 +68,6 @@ func parse() {
 }
 
 func run() {
-	// var scanner *bufio.Scanner
 	var reader *bufio.Reader
 	if readfile {
 		inputFile, inputErr := os.Open(filename)
@@ -78,56 +75,49 @@ func run() {
 			log.Fatal("An error occurred on opening the inputFile\nCheck if the file exists and access.\n")
 		}
 		defer inputFile.Close()
-		// scanner = bufio.NewScanner(inputFile)
 		reader = bufio.NewReader(inputFile)
 	} else {
-		// scanner = bufio.NewScanner(os.Stdin)
 		reader = bufio.NewReader(os.Stdin)
 	}
 
 	pagectr := 1
 	linectr := 0
 	for {
-		line, err := reader.ReadString('\n')
+		ch, _, err := reader.ReadRune()
 		if err == io.EOF {
-			cmdinpipe.Close()
-			lpcmd.Wait()
+			if uselp {
+				cmdinpipe.Close()
+				lpcmd.Wait()
+			}
 			break
 		} else if err != nil {
 			panic(err)
 		}
-		// line = strings.Replace(line, "\n", "", -1)
 		if findNewPageSign {
-			// string iteration
-			strbyte := []byte(line)
-			for len(strbyte) > 0 {
-				r, n := utf8.DecodeRune(strbyte)
-				if r == '\f' {
-					pagectr++
-				}
-				if pagectr >= startpg && pagectr <= endpg {
-					if uselp {
-						cmdinpipe.Write([]byte(string(r)))
-					} else {
-						fmt.Print(string(r))
-					}
-				}
-				strbyte = strbyte[n:]
+			if ch == '\f' {
+				pagectr++
 			}
 		} else {
-			linectr++
-			if linectr > lineCountPg {
-				pagectr++
-				linectr = 1
-			}
-			if pagectr >= startpg && pagectr <= endpg {
-				if uselp {
-					cmdinpipe.Write([]byte(line))
-				} else {
-					fmt.Print(line)
+			if ch == '\n' {
+				linectr++
+				if linectr > lineCountPg {
+					pagectr++
+					linectr = 1
 				}
 			}
 		}
+		if pagectr >= startpg && pagectr <= endpg {
+			if uselp {
+				cmdinpipe.Write([]byte(string(ch)))
+			} else {
+				fmt.Print(string(ch))
+			}
+		}
+	}
+	if pagectr < startpg {
+		warning.Printf("start_page (%v) greater than total pages (%v), no output written.\n", startpg, pagectr)
+	} else if pagectr < endpg {
+		warning.Printf("end_page (%v) greater than total pages (%d), less output than expected.\n", endpg, pagectr)
 	}
 }
 
