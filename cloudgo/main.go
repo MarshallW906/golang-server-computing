@@ -8,21 +8,21 @@ import (
 )
 
 func sayhelloName(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()                  //解析参数，默认是不会解析的
-	fmt.Println("r.Form:", r.Form) //这些信息是输出到服务器端的打印信息
-	fmt.Println("path", r.URL.Path)
-	if r.Form != nil {
-		for k, v := range r.Form {
-			fmt.Println("key:", k)
-			fmt.Println("val:", strings.Join(v, ", "))
-		}
+	r.ParseForm()                   // Parse (will not automatic parse unless you call it manually)
+	fmt.Println("r.Form:", r.Form)  // Print out the Form to Server Side
+	fmt.Println("path", r.URL.Path) // Print out the Path of the Request
+	// Print out the form submitted via GET
+	for k, v := range r.Form {
+		fmt.Println("key:", k)
+		fmt.Println("val:", strings.Join(v, ", "))
 	}
-	fmt.Fprintf(w, "Hello %+v!\n", r.Form.Get("name")) //这个写入到w的是输出到客户端的
+	// Write Response back to Client (Will be displayed on Browser)
+	fmt.Fprintf(w, "Hello %+v!\n", r.Form.Get("name"))
 }
 
 func main() {
-	http.HandleFunc("/", sayhelloName)       //设置访问的路由
-	err := http.ListenAndServe(":9090", nil) //设置监听的端口
+	http.HandleFunc("/", sayhelloName)       // Set Router
+	err := http.ListenAndServe(":9090", nil) // Set Listening Port
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
