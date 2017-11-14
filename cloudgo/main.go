@@ -1,29 +1,33 @@
 package main
 
 import (
-	"fmt"
-	"log"
-	"net/http"
-	"strings"
+	"os"
+
+	"github.com/MarshallW906/golang-server-computing/cloudgo/service"
+	flag "github.com/spf13/pflag"
 )
 
-func sayhelloName(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()                   // Parse (will not automatic parse unless you call it manually)
-	fmt.Println("r.Form:", r.Form)  // Print out the Form to Server Side
-	fmt.Println("path", r.URL.Path) // Print out the Path of the Request
-	// Print out the form submitted via GET
-	for k, v := range r.Form {
-		fmt.Println("key:", k)
-		fmt.Println("val:", strings.Join(v, ", "))
-	}
-	// Write Response back to Client (Will be displayed on Browser)
-	fmt.Fprintf(w, "Hello %+v!\n", r.Form.Get("name"))
-}
+const (
+	// PORT : default listening port if os doesn't have an env $PORT & -p not specified
+	PORT string = "9090"
+)
 
 func main() {
-	http.HandleFunc("/", sayhelloName)       // Set Router
-	err := http.ListenAndServe(":9090", nil) // Set Listening Port
-	if err != nil {
-		log.Fatal("ListenAndServe: ", err)
+	// first get $PORT
+	port := os.Getenv("PORT")
+	// if os doesn't have an env $PORT, set to const PORT
+	if len(port) == 0 {
+		port = PORT
 	}
+
+	// if specified -p, set listening port to the value of -p
+	pPort := flag.StringP("port", "p", PORT, "PORT for httpd listening")
+	flag.Parse()
+	if len(*pPort) != 0 {
+		port = *pPort
+	}
+
+	// start server
+	server := service.NewServer()
+	server.Run(":" + port)
 }
