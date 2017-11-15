@@ -18,3 +18,5 @@ debug
 *.log
 *.txt
 playground/
+
+.DS_Store
