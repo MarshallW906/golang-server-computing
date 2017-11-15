@@ -36,6 +36,10 @@ func initRoutes(mx *mux.Router, formatter *render.Render) {
 		}
 	}
 
+	// PathPrefix must be after all other handleFunc
 	mx.HandleFunc("/api/test", apiTestHandler(formatter)).Methods("GET")
-	mx.PathPrefix("/").Handler(http.FileServer(http.Dir(webRoot + "/assets/")))
+	// Wrong
+	// mx.PathPrefix("/static").Handler(http.FileServer(http.Dir(webRoot + "/assets/")))
+	// Correct
+	mx.PathPrefix("/static").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(webRoot+"/assets/"))))
 }
