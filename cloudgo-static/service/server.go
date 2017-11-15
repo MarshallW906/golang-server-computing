@@ -38,5 +38,4 @@ func initRoutes(mx *mux.Router, formatter *render.Render) {
 
 	mx.HandleFunc("/api/test", apiTestHandler(formatter)).Methods("GET")
 	mx.PathPrefix("/").Handler(http.FileServer(http.Dir(webRoot + "/assets/")))
-
 }
