@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/MarshallW906/golang-server-computing/cloudgo/service"
+	"github.com/MarshallW906/golang-server-computing/web-cloudgo/cloudgo-template/service"
 	flag "github.com/spf13/pflag"
 )
 
