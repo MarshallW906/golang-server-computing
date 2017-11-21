@@ -1,4 +1,5 @@
 # Simple HTTP Server
+
 <!-- TOC -->
 
 - [Simple HTTP Server](#simple-http-server)
@@ -10,33 +11,36 @@
         - [test with ab](#test-with-ab-1)
 
 <!-- /TOC -->
+
 ## Create a simple Http Server with net/http
+
 You just need to call `http.HandleFunc()` and `http.ListenAndServe()`, then implement a Handle Function.
 
 ```go
 func sayhelloName(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()                   // Parse (will not automatic parse unless you call it manually)
-	fmt.Println("r.Form:", r.Form)  // Print out the Form to Server Side
-	fmt.Println("path", r.URL.Path) // Print out the Path of the Request
-	// Print out the form submitted via GET
-	for k, v := range r.Form {
-		fmt.Println("key:", k)
-		fmt.Println("val:", strings.Join(v, ", "))
-	}
-	// Write Response back to Client (Will be displayed on Browser)
-	fmt.Fprintf(w, "Hello %+v!\n", r.Form.Get("name"))
+    r.ParseForm()                   // Parse (will not automatic parse unless you call it manually)
+    fmt.Println("r.Form:", r.Form)  // Print out the Form to Server Side
+    fmt.Println("path", r.URL.Path) // Print out the Path of the Request
+    // Print out the form submitted via GET
+    for k, v := range r.Form {
+        fmt.Println("key:", k)
+        fmt.Println("val:", strings.Join(v, ", "))
+    }
+    // Write Response back to Client (Will be displayed on Browser)
+    fmt.Fprintf(w, "Hello %+v!\n", r.Form.Get("name"))
 }
 
 func main() {
-	http.HandleFunc("/", sayhelloName)       // Set Router
-	err := http.ListenAndServe(":9090", nil) // Set Listening Port
-	if err != nil {
-		log.Fatal("ListenAndServe: ", err)
-	}
+    http.HandleFunc("/", sayhelloName)       // Set Router
+    err := http.ListenAndServe(":9090", nil) // Set Listening Port
+    if err != nil {
+        log.Fatal("ListenAndServe: ", err)
+    }
 }
 ```
 
 ### test with curl
+
 ```
 ✗ curl -v "http://localhost:9090/?url_long=111&url_long=222&name=aab"
 
@@ -58,6 +62,7 @@ Hello aab!
 ```
 
 ### test with ab
+
 ```
 ✗ ab -n 1000 -c 100 "http://localhost:9090/?url_long=111&url_long=222&name=aab"
 This is ApacheBench, Version 2.3 <$Revision: 1796539 $>
@@ -145,6 +150,7 @@ Code files are stored in this folder.
 ```
 
 ### test with ab
+
 ```
 ✗ ab -n 1000 -c 100 http://localhost:4396/hello/clearlove
 This is ApacheBench, Version 2.3 <$Revision: 1796539 $>
