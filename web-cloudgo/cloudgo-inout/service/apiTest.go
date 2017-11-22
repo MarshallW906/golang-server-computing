@@ -22,6 +22,6 @@ func apiTestHandler(formatter *render.Render) http.HandlerFunc {
 			ID      string `json:"id"`
 			Content string `json:"content"`
 			Token   string `json:"token"`
-		}{ID: "8675309", Content: "Hello from Go! \nof api/test", Token: token})
+		}{ID: "8675309", Content: "Hello from Go! of api/test", Token: token})
 	}
 }
