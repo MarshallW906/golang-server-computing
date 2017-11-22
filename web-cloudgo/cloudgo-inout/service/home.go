@@ -12,12 +12,13 @@ import (
 )
 
 func homeHandler(formatter *render.Render) http.HandlerFunc {
-	crutime := time.Now().Unix()
-	h := md5.New()
-	io.WriteString(h, strconv.FormatInt(crutime, 10))
-	token := fmt.Sprintf("%x", h.Sum(nil))
 
 	return func(w http.ResponseWriter, req *http.Request) {
+		crutime := time.Now().Unix()
+		h := md5.New()
+		io.WriteString(h, strconv.FormatInt(crutime, 10))
+		token := fmt.Sprintf("%x", h.Sum(nil))
+
 		formatter.HTML(w, http.StatusOK, "index", struct {
 			ID      string `json:"id"`
 			Content string `json:"content"`
