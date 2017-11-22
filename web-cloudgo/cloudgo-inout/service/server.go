@@ -41,10 +41,21 @@ func initRoutes(mx *mux.Router, formatter *render.Render) {
 	// let add the Request with prefix "/static" be sent to FileServer
 	mx.PathPrefix("/static").Handler(http.StripPrefix("/static", http.FileServer(http.Dir(webRoot+"/assets/"))))
 	mx.HandleFunc("/", homeHandler(formatter)).Methods("GET")
+	mx.HandleFunc("/api/test", apiTestHandler(formatter)).Methods("GET")
 	mx.HandleFunc("/unknown", inDevelopment).Methods("GET", "POST")
 }
 
 func inDevelopment(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 	w.Write([]byte("Sorry, this is in development."))
+}
+
+func apiTestHandler(formatter *render.Render) http.HandlerFunc {
+
+	return func(w http.ResponseWriter, req *http.Request) {
+		formatter.JSON(w, http.StatusOK, struct {
+			ID      string `json:"id"`
+			Content string `json:"content"`
+		}{ID: "8675309", Content: "Hello from Go! \nof api/test"})
+	}
 }
