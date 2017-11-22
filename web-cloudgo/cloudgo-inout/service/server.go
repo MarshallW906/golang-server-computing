@@ -39,7 +39,7 @@ func initRoutes(mx *mux.Router, formatter *render.Render) {
 	}
 
 	// let add the Request with prefix "/static" be sent to FileServer
-	mx.PathPrefix("/static").Handler(http.StripPrefix("/static", http.FileServer(http.Dir(webRoot+"/assets/"))))
+	mx.PathPrefix("/static").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(webRoot+"/assets/"))))
 
 	mx.HandleFunc("/", homeHandler(formatter)).Methods("GET")
 	mx.HandleFunc("/api/test", apiTestHandler(formatter)).Methods("GET")

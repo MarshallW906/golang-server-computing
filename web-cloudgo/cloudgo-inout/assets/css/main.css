@@ -1,9 +1,9 @@
 body {
-    background-color: #eff7de;
+    background-color: #bce661;
 }
 
 table,
 tr,
 td {
-    border: 2px black;
+    border: 2px solid black;
 }
