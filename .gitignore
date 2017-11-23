@@ -20,3 +20,8 @@ debug
 playground/
 
 .DS_Store
+
+# for negroni-gb2312
+*~
+cover.out
+tags
