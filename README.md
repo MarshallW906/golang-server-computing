@@ -14,3 +14,5 @@ The first hw's blog was written in Chinese but the latter will all be in English
 - Cli-Agenda with Cobra & travisCI [Group Work in this git](https://github.com/FideoJ/Agenda)
 - Web-Cloudgo basic: [click this](https://github.com/MarshallW906/golang-server-computing/tree/master/web-cloudgo/cloudgo)
 - Web-Cloudgo-io: [click this](https://github.com/MarshallW906/golang-server-computing/tree/master/web-cloudgo/cloudgo-inout)
+  - Negroni-gbk (Middleware for Negroni) (Not Completed yet)
+- Web-Cloudgo-Database [click this](https://github.com/MarshallW906/golang-server-computing/tree/master/web-cloudgo/cloudgo-data)
