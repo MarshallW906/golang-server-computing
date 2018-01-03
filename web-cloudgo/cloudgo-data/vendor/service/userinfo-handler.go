@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/MarshallW906/golang-server-computing/web-cloudgo/cloudgo-data/entities"
+	"entities"
 
 	"github.com/unrolled/render"
 )
