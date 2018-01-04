@@ -1,46 +1,30 @@
 package main
 
 import (
-    "fmt"
-    "runtime"
-    "strconv"
-    "strings"
-    "sync"
-    "time"
+	"asynchronous"
+	"fmt"
+	"synchronous"
+
+	"github.com/spf13/pflag"
 )
 
-func GoID() int {
-    var buf [64]byte
-    n := runtime.Stack(buf[:], false)
-    idField := strings.Fields(strings.TrimPrefix(string(buf[:n]), "goroutine "))[0]
-    id, err := strconv.Atoi(idField)
-    if err != nil {
-        panic(fmt.Sprintf("cannot get goroutine id: %v", err))
-    }
-    return id
+var scenario *string
+
+func init() {
+	scenario = pflag.StringP("scenario", "s", "1",
+		"choose a scenario, 1 for the synchronized scenario,"+
+			" 2 for the asynchronized one"+
+			" default to 1")
+	pflag.Parse()
 }
 
 func main() {
-    fmt.Println("main", GoID())
-    runtime.GOMAXPROCS(1)
-    var wg sync.WaitGroup
-    for i := 0; i < 10; i++ {
-        i := i
-        wg.Add(1)
-        go func() {
-            defer wg.Done()
-            fmt.Println(i, GoID())
-        }()
-    }
-    fmt.Println("++++++++++++++")
-      time.Sleep(1000)
-    for i:=1<<10; i>0; i-- {
-      i++
-      fmt.Print("/")
-      i--
-    } 
-    fmt.Println("")
-    fmt.Println("++++++++++++++")
-    wg.Wait()
+	switch *scenario {
+	case "1":
+		asynchronous.Start()
+	case "2":
+		synchronous.Start()
+	default:
+		fmt.Println("Please choose a scenario, 1 for the synchronized one, 2 for the async one")
+	}
 }
-
